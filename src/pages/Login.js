@@ -1,13 +1,16 @@
+// Login.js
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Spinner from "./Spinner"; // Import Spinner component
 
 function Login() {
   const [loginInfo, setLoginInfo] = useState({
     email: "",
     password: "",
   });
+  const [loading, setLoading] = useState(false); // State for loader
 
   const navigate = useNavigate();
 
@@ -34,6 +37,8 @@ function Login() {
       return handleError("Email and password are required");
     }
 
+    setLoading(true); // Show loader
+
     try {
       const response = await fetch(
         "https://backendcodeloginproject.onrender.com/auth/login",
@@ -59,8 +64,6 @@ function Login() {
         // Store the JWT token in localStorage
         localStorage.setItem("token", jwtToken);
         localStorage.setItem("loggedInUser", result.email);
-        console.log("Token stored:", jwtToken);
-        console.log("User info:", result);
 
         setTimeout(() => {
           navigate("/home"); // Redirect after successful login
@@ -70,6 +73,8 @@ function Login() {
       }
     } catch (err) {
       handleError(err.message || "An unexpected error occurred");
+    } finally {
+      setLoading(false); // Hide loader
     }
   };
 
@@ -97,7 +102,9 @@ function Login() {
             value={loginInfo.password}
           />
         </div>
-        <button type="submit">Login</button>
+        <button type="submit" disabled={loading}>
+          {loading ? <Spinner /> : "Login"}
+        </button>
         <span>
           Don't have an account? <Link to="/signup">Signup</Link>
         </span>
@@ -162,15 +169,16 @@ export default Login;
 //       }
 
 //       const result = await response.json();
-//       const { success, message, token, error } = result; // Assuming the backend sends the token
+//       const { success, message, jwtToken, error } = result;
 
 //       if (success) {
 //         handleSuccess(message);
 
 //         // Store the JWT token in localStorage
-//         localStorage.setItem("token", token);
-//         console.log(token);
-//         console.log(result);
+//         localStorage.setItem("token", jwtToken);
+//         localStorage.setItem("loggedInUser", result.email);
+//         console.log("Token stored:", jwtToken);
+//         console.log("User info:", result);
 
 //         setTimeout(() => {
 //           navigate("/home"); // Redirect after successful login
